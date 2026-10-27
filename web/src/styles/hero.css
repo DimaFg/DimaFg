@@ -1,0 +1,59 @@
+.hero {
+  min-height: 100vh; min-height: 100svh;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 140px clamp(20px, 4vw, 56px) 90px;
+  position: relative;
+  background:
+    radial-gradient(ellipse at 78% 12%, rgba(224, 137, 74, 0.16), transparent 52%),
+    radial-gradient(ellipse at 15% 90%, rgba(232, 57, 28, 0.06), transparent 55%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-panel) 100%);
+  border-bottom: 1px solid var(--rule);
+}
+
+.hero-frame-tag {
+  position: absolute; top: 130px; right: clamp(20px, 4vw, 56px);
+  font-size: 12px; color: var(--muted-2);
+  display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+}
+.hero-frame-tag .dot {
+  display: inline-block; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); margin-right: 6px;
+  animation: blink 2.4s infinite;
+}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+.hero h1 {
+  font-size: clamp(42px, 8vw, 108px);
+  line-height: 0.94;
+  max-width: 14ch;
+}
+/* В прототипе на 375px «Монументальность» выходила за край экрана — масштабируем по ширине. */
+@media (max-width: 480px) {
+  .hero h1 { font-size: 9.2vw; }
+}
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero p {
+  max-width: 520px; margin-top: 28px;
+  font-size: 17px; line-height: 1.6; color: var(--paper-dim);
+}
+.hero-cta { margin-top: 40px; display: flex; gap: 16px; flex-wrap: wrap; }
+
+/* Шапка внутренних страниц — тот же язык, что у hero, но ниже. */
+.page-hero {
+  padding: 150px clamp(20px, 4vw, 56px) 64px;
+  background:
+    radial-gradient(ellipse at 78% 12%, rgba(224, 137, 74, 0.12), transparent 52%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-panel) 100%);
+  border-bottom: 1px solid var(--rule);
+}
+.page-hero h1 { font-size: clamp(36px, 6vw, 72px); line-height: 1; max-width: 18ch; }
+.page-hero p { max-width: 620px; margin-top: 22px; font-size: 17px; line-height: 1.6; color: var(--paper-dim); }
+
+.breadcrumbs ol {
+  list-style: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0 0 22px;
+  font-family: var(--font-mono); font-size: 12px; color: var(--muted); text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.breadcrumbs li + li::before { content: "/"; margin-right: 8px; color: var(--muted-2); }
+.breadcrumbs a { text-decoration: none; }
+.breadcrumbs a:hover { color: var(--accent); }

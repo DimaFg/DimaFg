@@ -1,0 +1,57 @@
+.lightbox {
+  width: 100vw; height: 100vh; height: 100dvh;
+  max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+  background: rgba(12, 11, 9, 0.96); color: var(--paper);
+}
+.lightbox::backdrop { background: rgba(12, 11, 9, 0.8); }
+.lightbox[open] { display: grid; grid-template-rows: auto 1fr auto; }
+
+.lightbox-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 14px clamp(16px, 3vw, 32px);
+  font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.lightbox-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 44px; height: 44px; padding: 0 14px;
+  background: var(--bg); color: var(--paper); border: 1px solid var(--rule);
+  font-family: var(--font-mono); font-size: 13px; cursor: pointer; transition: border-color 0.2s;
+}
+.lightbox-btn:hover { border-color: var(--paper-dim); }
+
+.lightbox-stage {
+  position: relative; min-height: 0;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 8px;
+  padding: 0 clamp(8px, 2vw, 24px);
+}
+.lightbox-figure {
+  margin: 0; min-height: 0; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+}
+.lightbox-figure img, .lightbox-figure picture {
+  max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block;
+}
+.lightbox-figure picture { display: contents; }
+.lightbox-placeholder {
+  width: min(100%, 960px); aspect-ratio: 3 / 2;
+  background: linear-gradient(160deg, var(--bg-panel-2) 0%, var(--bg-panel) 60%);
+  border: 1px solid var(--rule);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 12px; color: var(--muted-2); letter-spacing: 0.1em;
+}
+
+.lightbox-caption {
+  padding: 16px clamp(16px, 3vw, 32px) 22px;
+  display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline;
+}
+.lightbox-caption h2 { font-size: clamp(18px, 2.4vw, 24px); }
+.lightbox-caption p { margin: 0; font-family: var(--font-mono); font-size: 12px; color: var(--paper-dim); }
+
+@media (max-width: 700px) {
+  .lightbox-stage { grid-template-columns: 1fr; }
+  .lightbox-stage .lightbox-btn.prev,
+  .lightbox-stage .lightbox-btn.next { position: absolute; bottom: 8px; z-index: 2; }
+  .lightbox-stage .lightbox-btn.prev { left: 12px; }
+  .lightbox-stage .lightbox-btn.next { right: 12px; }
+}

@@ -1,0 +1,16 @@
+.prose { max-width: 760px; }
+.prose h2 { font-size: clamp(22px, 3vw, 28px); margin: 48px 0 16px; }
+.prose p, .prose li { color: var(--paper-dim); font-size: 16px; line-height: 1.75; }
+.prose ul { padding-left: 20px; }
+.prose a { color: var(--paper); }
+.prose a:hover { color: var(--accent); }
+
+.notice {
+  border: 1px solid var(--amber-dim); background: rgba(224, 137, 74, 0.06);
+  padding: 16px 20px; font-size: 14px; line-height: 1.6; color: var(--paper-dim); margin-bottom: 32px;
+}
+.notice strong { color: var(--amber); font-weight: 500; }
+
+.not-found { min-height: 70vh; display: flex; flex-direction: column; justify-content: center; }
+.not-found h1 { font-size: clamp(48px, 10vw, 120px); line-height: 0.95; }
+.not-found p { color: var(--paper-dim); font-size: 17px; margin: 22px 0 36px; max-width: 520px; }

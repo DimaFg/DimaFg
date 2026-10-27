@@ -1,0 +1,28 @@
+# SITE_ADDRESS: домен (example.ru) — Caddy сам выпустит и продлит TLS-сертификат.
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), interest-cohort=()"
+		# 'unsafe-inline' для script нужен Next.js (inline bootstrap). При подключении аналитики
+		# и CDN домены добавляются явно. Ужесточить через nonce — отдельная задача.
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+		-Server
+	}
+
+	# Документация API и OpenAPI закрыты в production средствами самого приложения.
+	handle /api/* {
+		request_body {
+			max_size 64KB
+		}
+		reverse_proxy api:8000
+	}
+
+	handle {
+		reverse_proxy web:3000
+	}
+}

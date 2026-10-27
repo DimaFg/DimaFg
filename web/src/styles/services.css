@@ -1,0 +1,42 @@
+.services-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px;
+  background: var(--rule); border: 1px solid var(--rule); margin: 44px 0 0; padding: 0; list-style: none;
+}
+@media (max-width: 700px) { .services-grid { grid-template-columns: 1fr; } }
+.service-card.wide { grid-column: 1 / -1; }
+
+.service-card {
+  background: var(--bg); padding: 38px 34px; position: relative;
+  transition: background 0.25s;
+  display: flex; flex-direction: column;
+}
+.service-card:hover { background: var(--bg-panel); }
+.service-num {
+  font-family: var(--font-mono); font-size: 12px; color: var(--accent);
+  margin-bottom: 18px; display: block;
+}
+.service-card h3 { font-size: 23px; margin-bottom: 12px; letter-spacing: 0.01em; }
+.service-card h3 a { text-decoration: none; }
+/* Вся карточка кликабельна, ссылка остаётся одна — без дублей для скринридера. */
+.service-card h3 a::after { content: ""; position: absolute; inset: 0; }
+.service-card h3 a:focus-visible { outline: none; }
+.service-card:has(h3 a:focus-visible) { outline: 2px solid var(--amber); outline-offset: -2px; }
+.service-card p { color: var(--muted); font-size: 14.5px; line-height: 1.65; margin: 0 0 18px; flex: 1; }
+.service-price {
+  font-family: var(--font-mono); font-size: 13px; color: var(--paper-dim);
+  border-top: 1px solid var(--rule); padding-top: 14px;
+  display: flex; justify-content: space-between; gap: 12px;
+}
+.service-more { color: var(--accent); white-space: nowrap; }
+
+/* Страница услуги */
+.service-detail { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 56px; }
+@media (max-width: 800px) { .service-detail { grid-template-columns: 1fr; gap: 36px; } }
+.service-detail-body p { color: var(--paper-dim); font-size: 16px; line-height: 1.75; }
+.service-facts { margin: 0; border-top: 1px solid var(--rule); }
+.service-facts div {
+  display: flex; justify-content: space-between; gap: 16px; padding: 16px 0;
+  border-bottom: 1px solid var(--rule); font-family: var(--font-mono); font-size: 14px;
+}
+.service-facts dt { color: var(--muted); }
+.service-facts dd { margin: 0; text-align: right; }

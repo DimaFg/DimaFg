@@ -1,0 +1,96 @@
+# Local и одиночный VPS: Caddy (TLS) → web (Next.js) и api (FastAPI); worker; PostgreSQL.
+# Наружу публикуются только 80/443 Caddy. PostgreSQL, api и worker доступны лишь во внутренней сети.
+name: photo-site
+
+x-api-env: &api-env
+  ENVIRONMENT: ${ENVIRONMENT:-local}
+  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-photo}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-photo}
+  APP_SECRET: ${APP_SECRET:?set APP_SECRET}
+  MEDIA_PUBLIC_BASE_URL: ${MEDIA_PUBLIC_BASE_URL:-https://cdn.example.com}
+  PRIVACY_POLICY_VERSION: ${PRIVACY_POLICY_VERSION:-2026-10-draft}
+  TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+  TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+  SMTP_HOST: ${SMTP_HOST:-}
+  SMTP_PORT: ${SMTP_PORT:-587}
+  SMTP_USER: ${SMTP_USER:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  NOTIFY_EMAIL_FROM: ${NOTIFY_EMAIL_FROM:-}
+  NOTIFY_EMAIL_TO: ${NOTIFY_EMAIL_TO:-}
+  ADMIN_BASE_URL: ${SITE_URL:-http://localhost}/admin
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-photo}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-photo}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-photo}"]
+      interval: 5s
+      retries: 10
+
+  # Миграции выполняются один раз перед запуском новой версии, а не каждым worker-процессом.
+  migrate:
+    build: ./api
+    command: ["sh", "-c", "alembic upgrade head && python -m app.cli seed"]
+    environment: *api-env
+    depends_on:
+      db: { condition: service_healthy }
+    restart: "no"
+
+  api:
+    build: ./api
+    restart: unless-stopped
+    environment: *api-env
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    healthcheck:
+      # ProxyHandler({}) — запрос к localhost не должен уходить через HTTP(S)_PROXY окружения
+      test: ["CMD", "python", "-c", "import urllib.request as u; u.build_opener(u.ProxyHandler({})).open('http://127.0.0.1:8000/api/health/ready', timeout=5)"]
+      interval: 15s
+      retries: 3
+
+  worker:
+    build: ./api
+    command: ["python", "-m", "app.cli", "worker"]
+    restart: unless-stopped
+    environment: *api-env
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+
+  web:
+    build:
+      context: ./web
+      args:
+        NEXT_PUBLIC_SITE_URL: ${SITE_URL:-http://localhost}
+        NEXT_PUBLIC_SITE_ENV: ${ENVIRONMENT:-local}
+        NEXT_PUBLIC_CONTACT_EMAIL: ${CONTACT_EMAIL:-}
+        NEXT_PUBLIC_TELEGRAM_HANDLE: ${TELEGRAM_HANDLE:-}
+        NEXT_PUBLIC_TELEGRAM_CHANNEL: ${TELEGRAM_CHANNEL:-}
+        NEXT_PUBLIC_PRIVACY_POLICY_VERSION: ${PRIVACY_POLICY_VERSION:-2026-10-draft}
+    restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://api:8000
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-localhost}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [web, api]
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

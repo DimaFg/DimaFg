@@ -1,0 +1,54 @@
+header.site-header {
+  position: fixed; top: 0; left: var(--rail-w); right: var(--rail-w); z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px clamp(20px, 4vw, 56px);
+  background: linear-gradient(to bottom, rgba(20, 18, 16, 0.92), rgba(20, 18, 16, 0));
+}
+@media (max-width: 860px) { header.site-header { left: 0; right: 0; } }
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: flex; align-items: baseline; gap: 8px;
+  text-decoration: none;
+}
+.logo span { color: var(--accent); }
+.logo img { height: 30px; width: auto; display: block; }
+
+.site-nav { display: flex; gap: clamp(14px, 3vw, 34px); align-items: center; }
+.site-nav a {
+  text-decoration: none; font-size: 13px; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--muted);
+  font-family: var(--font-mono);
+  transition: color 0.2s;
+}
+.site-nav a:hover, .site-nav a:focus-visible { color: var(--paper); }
+.site-nav a.tg { color: var(--accent); }
+.nav-toggle, .nav-backdrop { display: none; }
+
+@media (max-width: 700px) {
+  .site-nav {
+    position: fixed; top: 0; right: -100%; height: 100vh; height: 100dvh; width: min(78vw, 320px);
+    background: var(--bg-panel); flex-direction: column; justify-content: center;
+    gap: 28px; padding: 40px; z-index: 101;
+    visibility: hidden;
+    transition: right 0.35s ease, visibility 0s linear 0.35s;
+  }
+  .site-nav.open {
+    right: 0; visibility: visible;
+    transition: right 0.35s ease, visibility 0s;
+  }
+  .site-nav a { font-size: 15px; padding: 6px 0; }
+  /* Кнопка остаётся над открытой панелью, чтобы меню можно было закрыть. */
+  .nav-toggle {
+    display: flex; align-items: center; justify-content: center;
+    position: relative; z-index: 102;
+    background: var(--bg); border: 1px solid var(--rule);
+    color: var(--paper); font-size: 20px; width: 44px; height: 44px; cursor: pointer;
+  }
+  .nav-backdrop {
+    display: block; position: fixed; inset: 0; z-index: 100;
+    background: rgba(10, 9, 8, 0.6); border: 0; padding: 0;
+  }
+}

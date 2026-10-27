@@ -1,0 +1,33 @@
+.about { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 64px; align-items: center; }
+@media (max-width: 800px) { .about { grid-template-columns: 1fr; gap: 36px; } }
+
+.about-portrait {
+  aspect-ratio: 4 / 5;
+  background: repeating-linear-gradient(135deg, var(--bg-panel-2) 0 2px, var(--bg-panel) 2px 4px);
+  border: 1px solid var(--rule);
+  position: relative; overflow: hidden; margin: 0;
+}
+.about-portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.about-portrait.is-empty::after {
+  content: "ЗАМЕНИТЕ НА ПОРТРЕТ";
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 11px; color: var(--muted-2);
+  letter-spacing: 0.1em; text-align: center; padding: 20px;
+}
+.about-portrait .corner-tag {
+  position: absolute; bottom: 12px; left: 12px; font-family: var(--font-mono);
+  font-size: 11px; color: var(--muted); background: var(--bg); padding: 4px 8px;
+}
+
+.about-body .section-title { margin-bottom: 22px; }
+.about-body p { color: var(--paper-dim); line-height: 1.75; font-size: 16px; margin: 0 0 18px; }
+.about-quote {
+  border-left: 2px solid var(--accent); padding-left: 20px; margin: 28px 0;
+  font-family: var(--font-display); font-size: 22px; text-transform: none;
+  letter-spacing: 0; line-height: 1.4; color: var(--paper);
+}
+.about-stats { display: flex; gap: 36px; margin: 32px 0 0; flex-wrap: wrap; }
+.about-stats div { font-family: var(--font-mono); }
+.about-stats dt { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.about-stats dd { margin: 0; font-size: 26px; color: var(--accent); font-weight: 500; }
+.about-stats div { display: flex; flex-direction: column-reverse; }

@@ -1,0 +1,97 @@
+.sheet-head {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-bottom: 44px; gap: 20px; flex-wrap: wrap;
+}
+.sheet-head .mono { font-size: 12px; color: var(--muted-2); }
+.sheet-hint-touch { display: none; }
+@media (hover: none) {
+  .sheet-hint-hover { display: none; }
+  .sheet-hint-touch { display: inline; }
+}
+
+.sheet-filters { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 32px; padding: 0; list-style: none; }
+.filter-tab {
+  display: inline-block;
+  background: none; border: 1px solid var(--rule); color: var(--muted);
+  font-family: var(--font-mono); font-size: 12px; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 9px 16px; cursor: pointer; transition: all 0.2s;
+  text-decoration: none; min-height: 40px;
+}
+.filter-tab:hover { border-color: var(--paper-dim); color: var(--paper); }
+.filter-tab.active { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+
+.contact-sheet {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  margin: 0; padding: 0; list-style: none;
+}
+@media (max-width: 700px) { .contact-sheet { grid-template-columns: repeat(2, 1fr); } }
+.contact-sheet > li { display: contents; }
+
+.frame-cell {
+  display: block; width: 100%; padding: 0; border: 0; margin: 0; color: inherit; font: inherit;
+  text-align: left;
+  background: var(--bg-panel); position: relative; aspect-ratio: 3 / 2;
+  overflow: hidden; cursor: pointer;
+}
+.frame-cell:focus-visible { outline-offset: -3px; z-index: 4; }
+.frame-cell .ph {
+  position: absolute; inset: 0;
+  background: linear-gradient(160deg, var(--bg-panel-2) 0%, var(--bg-panel) 60%);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.5s ease, filter 0.5s ease;
+  filter: grayscale(1) contrast(1.05);
+  background-size: cover; background-position: center;
+}
+.frame-cell img.ph { width: 100%; height: 100%; object-fit: cover; }
+.frame-cell .ph-label {
+  font-family: var(--font-mono); font-size: 11px; color: var(--muted-2);
+  text-align: center; padding: 10px;
+}
+
+.frame-num {
+  position: absolute; top: 8px; left: 8px; font-family: var(--font-mono);
+  font-size: 10px; color: var(--muted); background: rgba(20, 18, 16, 0.7); padding: 2px 6px;
+  z-index: 3;
+}
+.frame-cap {
+  position: absolute; bottom: 0; left: 0; right: 0; padding: 8px 10px;
+  background: linear-gradient(to top, rgba(20, 18, 16, 0.9), transparent);
+  font-family: var(--font-mono); font-size: 10.5px; color: var(--paper-dim);
+  opacity: 0; transform: translateY(6px);
+  transition: opacity 0.3s, transform 0.3s; z-index: 3;
+}
+.select-mark {
+  position: absolute; inset: 14%; border: 2px solid var(--accent); border-radius: 50%;
+  opacity: 0; transform: scale(0.85) rotate(-4deg);
+  transition: opacity 0.35s ease, transform 0.35s ease; z-index: 2;
+  box-shadow: 0 0 0 1px rgba(232, 57, 28, 0.15);
+}
+
+@media (hover: hover) {
+  .frame-cell:hover .ph { transform: scale(1.06); filter: grayscale(0.4) contrast(1.1); }
+  .frame-cell:hover .frame-cap { opacity: 1; transform: translateY(0); }
+  .frame-cell:hover .select-mark { opacity: 0.85; transform: scale(1) rotate(-4deg); }
+}
+.frame-cell:focus-visible .frame-cap { opacity: 1; transform: translateY(0); }
+.frame-cell:focus-visible .select-mark { opacity: 0.85; transform: scale(1) rotate(-4deg); }
+/* На сенсорных экранах hover нет — подпись видна всегда. */
+@media (hover: none) {
+  .frame-cap { opacity: 1; transform: none; }
+}
+
+.frame-blank {
+  background: var(--bg-panel); position: relative; aspect-ratio: 3 / 2; overflow: hidden;
+}
+.frame-blank .ph {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: repeating-linear-gradient(45deg, var(--bg-panel-2) 0 2px, var(--bg) 2px 10px);
+  opacity: 0.55;
+}
+
+.sheet-empty {
+  border: 1px solid var(--rule); padding: 48px 24px; text-align: center;
+  font-family: var(--font-mono); font-size: 13px; color: var(--muted);
+}
+.sheet-more { margin-top: 32px; }

@@ -1,0 +1,66 @@
+.contact-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-top: 44px; }
+@media (max-width: 800px) { .contact-wrap { grid-template-columns: 1fr; gap: 40px; } }
+
+.field { margin-bottom: 20px; }
+.field label {
+  display: block; font-family: var(--font-mono); font-size: 11px;
+  color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;
+}
+.field input, .field textarea, .field select {
+  width: 100%; background: var(--bg-panel); border: 1px solid var(--rule);
+  color: var(--paper); padding: 13px 14px; font-family: var(--font-body);
+  /* 16px — чтобы iOS Safari не увеличивал страницу при фокусе */
+  font-size: 16px; outline: none; transition: border-color 0.2s; border-radius: 0;
+}
+.field input::placeholder, .field textarea::placeholder { color: var(--muted-text); }
+.field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
+.field input:focus-visible, .field textarea:focus-visible, .field select:focus-visible {
+  outline: 2px solid var(--amber); outline-offset: 0;
+}
+.field textarea { resize: vertical; min-height: 110px; }
+.field [aria-invalid="true"] { border-color: var(--accent); }
+.field-error {
+  margin: 8px 0 0; font-family: var(--font-mono); font-size: 12px; color: #ff7a5c;
+}
+
+.field-check { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 24px; }
+.field-check input {
+  appearance: none; flex: none; width: 20px; height: 20px; margin: 2px 0 0;
+  border: 1px solid var(--rule); background: var(--bg-panel); cursor: pointer;
+  display: grid; place-content: center;
+}
+.field-check input::before {
+  content: ""; width: 10px; height: 10px; background: var(--accent);
+  transform: scale(0); transition: transform 0.15s;
+}
+.field-check input:checked::before { transform: scale(1); }
+.field-check input[aria-invalid="true"] { border-color: var(--accent); }
+.field-check label { font-size: 13.5px; line-height: 1.6; color: var(--paper-dim); cursor: pointer; }
+.field-check a { color: var(--paper); }
+.field-check a:hover { color: var(--accent); }
+
+/* Honeypot: недоступен людям и скринридерам, но остаётся в DOM для ботов. */
+.hp-field { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+
+.form-status {
+  margin-top: 16px; padding: 14px 16px; border: 1px solid var(--rule);
+  font-size: 14px; line-height: 1.6;
+}
+.form-status.error { border-color: var(--accent); color: var(--paper); }
+.form-status:empty { display: none; }
+
+.form-success { border: 1px solid var(--rule); background: var(--bg-panel); padding: 32px 28px; }
+.form-success h3 { font-size: 24px; margin-bottom: 14px; }
+.form-success p { color: var(--paper-dim); line-height: 1.7; margin: 0 0 22px; }
+.form-success .mono { color: var(--accent); }
+
+.contact-info .row {
+  display: flex; justify-content: space-between; gap: 16px; padding: 16px 0;
+  border-bottom: 1px solid var(--rule); font-family: var(--font-mono); font-size: 14px;
+}
+.contact-info .row dt { color: var(--muted); }
+.contact-info .row dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
+.contact-info .row a { text-decoration: none; }
+.contact-info .row a:hover { color: var(--accent); }
+.contact-info dl { margin: 0; }
+.contact-note { margin-top: 28px; color: var(--muted); font-size: 13.5px; line-height: 1.7; }

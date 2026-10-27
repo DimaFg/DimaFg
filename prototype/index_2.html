@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Дмитрий — уличная фотография</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #141210;
+    --bg-panel: #1b1815;
+    --bg-panel-2: #211d19;
+    --paper: #eeeae1;
+    --paper-dim: #d8d2c4;
+    --ink: #141210;
+    --muted: #948c7c;
+    --muted-2: #5f594d;
+    --accent: #e8391c;
+    --accent-dim: #7a2213;
+    --amber: #e0894a;
+    --amber-dim: #8a5730;
+    --rule: #38332c;
+    --sprocket: #100e0c;
+    --maxw: 1180px;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+  }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--paper);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  h1,h2,h3,.display{
+    font-family:'Oswald', sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.02em;
+    margin:0;
+  }
+
+  .mono{
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing:0.03em;
+  }
+
+  a{ color:inherit; }
+
+  /* ---------- film grain overlay ---------- */
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:200;
+    opacity:0.05; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- sprocket rails (signature element) ---------- */
+  .rail{
+    position:fixed; top:0; bottom:0; width:34px;
+    background:var(--sprocket);
+    z-index:150;
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:space-evenly;
+    border-color:var(--rule);
+  }
+  .rail.left{ left:0; border-right:1px solid var(--rule); }
+  .rail.right{ right:0; border-left:1px solid var(--rule); }
+  .rail .hole{
+    width:12px; height:16px; border-radius:3px;
+    background:var(--bg);
+    box-shadow:inset 0 0 0 1px var(--rule);
+  }
+  @media (max-width: 860px){
+    .rail{ display:none; }
+  }
+
+  .frame{ margin-left:34px; margin-right:34px; }
+  @media (max-width: 860px){
+    .frame{ margin-left:0; margin-right:0; }
+  }
+
+  /* ---------- header ---------- */
+  header{
+    position:fixed; top:0; left:34px; right:34px; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:20px clamp(20px, 4vw, 56px);
+    background:linear-gradient(to bottom, rgba(20,18,16,0.92), rgba(20,18,16,0));
+  }
+  @media (max-width: 860px){ header{ left:0; right:0; } }
+
+  .logo{
+    font-family:'Oswald', sans-serif;
+    font-size:20px; font-weight:600; text-transform:uppercase;
+    letter-spacing:0.06em;
+    display:flex; align-items:baseline; gap:8px;
+    text-decoration:none;
+  }
+  .logo span{ color:var(--accent); }
+  .logo img{ height:30px; width:auto; display:block; }
+
+  nav{ display:flex; gap:clamp(14px,3vw,34px); align-items:center; }
+  nav a{
+    text-decoration:none; font-size:13px; text-transform:uppercase;
+    letter-spacing:0.08em; color:var(--muted);
+    font-family:'IBM Plex Mono', monospace;
+    transition:color 0.2s;
+  }
+  nav a:hover, nav a:focus-visible{ color:var(--paper); }
+  nav a.tg{ color:var(--accent); }
+  .nav-toggle{ display:none; }
+
+  @media (max-width: 700px){
+    nav{
+      position:fixed; top:0; right:-100%; height:100vh; width:min(78vw,320px);
+      background:var(--bg-panel); flex-direction:column; justify-content:center;
+      gap:28px; transition:right 0.35s ease; padding:40px;
+    }
+    nav.open{ right:0; }
+    .nav-toggle{
+      display:block; background:none; border:1px solid var(--rule);
+      color:var(--paper); font-size:20px; width:40px; height:40px; cursor:pointer;
+      z-index:101;
+    }
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    min-height:100vh;
+    display:flex; flex-direction:column; justify-content:flex-end;
+    padding:140px clamp(20px,4vw,56px) 90px;
+    position:relative;
+    background:
+      radial-gradient(ellipse at 78% 12%, rgba(224,137,74,0.16), transparent 52%),
+      radial-gradient(ellipse at 15% 90%, rgba(232,57,28,0.06), transparent 55%),
+      linear-gradient(180deg, var(--bg) 0%, var(--bg-panel) 100%);
+    border-bottom:1px solid var(--rule);
+  }
+
+  .hero-frame-tag{
+    position:absolute; top:130px; right:clamp(20px,4vw,56px);
+    font-size:12px; color:var(--muted-2);
+    display:flex; flex-direction:column; align-items:flex-end; gap:4px;
+  }
+  .hero-frame-tag .dot{
+    display:inline-block; width:7px; height:7px; border-radius:50%;
+    background:var(--accent); margin-right:6px;
+    animation:blink 2.4s infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+
+  .hero h1{
+    font-size:clamp(42px, 8vw, 108px);
+    line-height:0.94;
+    max-width:14ch;
+  }
+  .hero h1 em{
+    font-style:normal; color:var(--accent);
+  }
+  .hero p{
+    max-width:520px; margin-top:28px;
+    font-size:17px; line-height:1.6; color:var(--paper-dim);
+  }
+  .hero-cta{
+    margin-top:40px; display:flex; gap:16px; flex-wrap:wrap;
+  }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:14px 26px; font-family:'IBM Plex Mono', monospace;
+    font-size:13px; text-transform:uppercase; letter-spacing:0.08em;
+    text-decoration:none; border:1px solid var(--rule);
+    transition:all 0.2s; cursor:pointer;
+  }
+  .btn-primary{ background:var(--accent); color:var(--paper); border-color:var(--accent); }
+  .btn-primary:hover{ background:transparent; color:var(--accent); }
+  .btn-ghost{ color:var(--paper); }
+  .btn-ghost:hover{ border-color:var(--paper); }
+
+  /* ---------- section shell ---------- */
+  section{ padding:110px clamp(20px,4vw,56px); max-width:var(--maxw); margin:0 auto; }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--accent);
+    text-transform:uppercase; letter-spacing:0.14em; margin-bottom:14px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{ content:''; width:24px; height:1px; background:var(--accent); }
+  .section-title{ font-size:clamp(30px,4vw,46px); max-width:16ch; }
+
+  .reveal{ opacity:0; transform:translateY(24px); transition:opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  /* ---------- about ---------- */
+  .about{ display:grid; grid-template-columns:0.9fr 1.1fr; gap:64px; align-items:center; }
+  @media (max-width:800px){ .about{ grid-template-columns:1fr; gap:36px; } }
+
+  .about-portrait{
+    aspect-ratio:4/5; background:
+      repeating-linear-gradient(135deg, var(--bg-panel-2) 0 2px, var(--bg-panel) 2px 4px);
+    border:1px solid var(--rule);
+    position:relative; overflow:hidden;
+  }
+  .about-portrait::after{
+    content:'ЗАМЕНИТЕ НА ПОРТРЕТ';
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--muted-2);
+    letter-spacing:0.1em; text-align:center; padding:20px;
+  }
+  .about-portrait .corner-tag{
+    position:absolute; bottom:12px; left:12px; font-family:'IBM Plex Mono', monospace;
+    font-size:11px; color:var(--muted); background:var(--bg); padding:4px 8px;
+  }
+
+  .about-body p{ color:var(--paper-dim); line-height:1.75; font-size:16px; margin-bottom:18px; }
+  .about-quote{
+    border-left:2px solid var(--accent); padding-left:20px; margin:28px 0;
+    font-family:'Oswald', sans-serif; font-size:22px; text-transform:none;
+    letter-spacing:0; line-height:1.4; color:var(--paper);
+  }
+  .about-stats{ display:flex; gap:36px; margin-top:32px; flex-wrap:wrap; }
+  .about-stats div{ font-family:'IBM Plex Mono', monospace; }
+  .about-stats b{ display:block; font-size:26px; color:var(--accent); font-weight:500; }
+  .about-stats span{ font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; }
+
+  /* ---------- artist statement ---------- */
+  .statement{ position:relative; overflow:hidden; }
+  .statement-glow{
+    position:absolute; top:-15%; right:-10%; width:55%; height:70%;
+    background:radial-gradient(circle, rgba(224,137,74,0.14), transparent 70%);
+    filter:blur(10px); pointer-events:none; z-index:0;
+  }
+  .statement-body{ position:relative; z-index:1; }
+  .statement-intro{
+    max-width:640px; color:var(--paper-dim); font-size:17px; line-height:1.7; margin-top:20px;
+  }
+  .statement-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:56px; margin-top:56px;
+  }
+  @media (max-width:800px){ .statement-grid{ grid-template-columns:1fr; gap:36px; } }
+  .statement-block{ border-top:2px solid var(--amber); padding-top:20px; }
+  .statement-label{
+    display:block; color:var(--amber); font-size:12px; text-transform:uppercase;
+    letter-spacing:0.1em; margin-bottom:16px; font-family:'IBM Plex Mono', monospace;
+  }
+  .statement-block p{ color:var(--paper-dim); font-size:15px; line-height:1.75; }
+
+  .statement-pull{
+    font-family:'Oswald', sans-serif; font-weight:500; text-transform:none;
+    font-size:clamp(22px,3.2vw,32px); line-height:1.4; color:var(--paper);
+    max-width:22ch; letter-spacing:0; margin:64px 0 0;
+  }
+  .statement-pull em{ color:var(--amber); font-style:normal; }
+
+  .values-list{
+    display:flex; gap:1px; background:var(--rule); border:1px solid var(--rule);
+    margin-top:52px;
+  }
+  @media (max-width:700px){ .values-list{ flex-direction:column; } }
+  .value-item{ flex:1; background:var(--bg); padding:28px 26px; }
+  .value-item h4{
+    font-family:'Oswald', sans-serif; text-transform:uppercase; font-size:15.5px;
+    letter-spacing:0.03em; color:var(--paper); margin-bottom:10px; font-weight:600;
+  }
+  .value-item p{ color:var(--muted); font-size:13.5px; line-height:1.65; }
+
+  /* ---------- gallery / contact sheet ---------- */
+  .sheet-head{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    margin-bottom:44px; gap:20px; flex-wrap:wrap;
+  }
+  .sheet-head .mono{ font-size:12px; color:var(--muted-2); }
+
+  .sheet-filters{
+    display:flex; gap:10px; flex-wrap:wrap; margin:0 0 32px;
+  }
+  .filter-tab{
+    background:none; border:1px solid var(--rule); color:var(--muted);
+    font-family:'IBM Plex Mono', monospace; font-size:12px; text-transform:uppercase;
+    letter-spacing:0.06em; padding:9px 16px; cursor:pointer; transition:all 0.2s;
+  }
+  .filter-tab:hover{ border-color:var(--paper-dim); color:var(--paper); }
+  .filter-tab.active{ background:var(--accent); border-color:var(--accent); color:var(--paper); }
+
+  .contact-sheet{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:2px;
+    background:var(--rule);
+    border:1px solid var(--rule);
+  }
+  @media (max-width:700px){ .contact-sheet{ grid-template-columns:repeat(2,1fr); } }
+
+  .frame-cell{
+    background:var(--bg-panel); position:relative; aspect-ratio:3/2;
+    overflow:hidden; cursor:pointer;
+  }
+  .frame-cell .ph{
+    position:absolute; inset:0;
+    background:
+      linear-gradient(160deg, var(--bg-panel-2) 0%, var(--bg-panel) 60%);
+    display:flex; align-items:center; justify-content:center;
+    transition:transform 0.5s ease, filter 0.5s ease;
+    filter:grayscale(1) contrast(1.05);
+  }
+  .frame-cell .ph span{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--muted-2);
+    text-align:center; padding:10px;
+  }
+  .frame-cell:hover .ph{ transform:scale(1.06); filter:grayscale(0.4) contrast(1.1); }
+
+  .frame-num{
+    position:absolute; top:8px; left:8px; font-family:'IBM Plex Mono', monospace;
+    font-size:10px; color:var(--muted); background:rgba(20,18,16,0.7); padding:2px 6px;
+    z-index:3;
+  }
+  .frame-cap{
+    position:absolute; bottom:0; left:0; right:0; padding:8px 10px;
+    background:linear-gradient(to top, rgba(20,18,16,0.9), transparent);
+    font-family:'IBM Plex Mono', monospace; font-size:10.5px; color:var(--paper-dim);
+    opacity:0; transform:translateY(6px);
+    transition:opacity 0.3s, transform 0.3s; z-index:3;
+  }
+  .frame-cell:hover .frame-cap{ opacity:1; transform:translateY(0); }
+
+  .select-mark{
+    position:absolute; inset:14%; border:2px solid var(--accent); border-radius:50%;
+    opacity:0; transform:scale(0.85) rotate(-4deg);
+    transition:opacity 0.35s ease, transform 0.35s ease; z-index:2;
+    box-shadow:0 0 0 1px rgba(232,57,28,0.15);
+  }
+  .frame-cell:hover .select-mark{ opacity:0.85; transform:scale(1) rotate(-4deg); }
+
+  .frame-blank .ph{
+    background:repeating-linear-gradient(45deg, var(--bg-panel-2) 0 2px, var(--bg) 2px 10px);
+    opacity:0.55; cursor:default;
+  }
+  .frame-blank:hover .ph{ transform:none; filter:none; }
+  .frame-blank{ cursor:default; }
+
+  /* ---------- services ---------- */
+  .services-grid{
+    display:grid; grid-template-columns:repeat(2, 1fr); gap:1px;
+    background:var(--rule); border:1px solid var(--rule); margin-top:44px;
+  }
+  @media (max-width:700px){ .services-grid{ grid-template-columns:1fr; } }
+  .service-card.wide{ grid-column:1 / -1; }
+
+  .service-card{
+    background:var(--bg); padding:38px 34px; position:relative;
+    transition:background 0.25s;
+  }
+  .service-card:hover{ background:var(--bg-panel); }
+  .service-num{
+    font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--accent);
+    margin-bottom:18px; display:block;
+  }
+  .service-card h3{
+    font-size:23px; margin-bottom:12px; letter-spacing:0.01em;
+  }
+  .service-card p{
+    color:var(--muted); font-size:14.5px; line-height:1.65; margin-bottom:18px;
+  }
+  .service-price{
+    font-family:'IBM Plex Mono', monospace; font-size:13px; color:var(--paper-dim);
+    border-top:1px solid var(--rule); padding-top:14px;
+  }
+
+  /* ---------- contact ---------- */
+  .contact-wrap{
+    display:grid; grid-template-columns:1fr 1fr; gap:60px;
+  }
+  @media (max-width:800px){ .contact-wrap{ grid-template-columns:1fr; gap:40px; } }
+
+  .field{ margin-bottom:20px; }
+  .field label{
+    display:block; font-family:'IBM Plex Mono', monospace; font-size:11px;
+    color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:8px;
+  }
+  .field input, .field textarea, .field select{
+    width:100%; background:var(--bg-panel); border:1px solid var(--rule);
+    color:var(--paper); padding:13px 14px; font-family:'Inter', sans-serif;
+    font-size:14.5px; outline:none; transition:border-color 0.2s;
+  }
+  .field input:focus, .field textarea:focus, .field select:focus{
+    border-color:var(--accent);
+  }
+  .field textarea{ resize:vertical; min-height:110px; }
+
+  .contact-info .row{
+    display:flex; justify-content:space-between; padding:16px 0;
+    border-bottom:1px solid var(--rule); font-family:'IBM Plex Mono', monospace; font-size:14px;
+  }
+  .contact-info .row span:first-child{ color:var(--muted); }
+  .contact-info .row a{ text-decoration:none; }
+  .contact-info .row a:hover{ color:var(--accent); }
+  .contact-note{ margin-top:28px; color:var(--muted); font-size:13.5px; line-height:1.7; }
+
+  /* ---------- footer ---------- */
+  footer{
+    border-top:1px solid var(--rule); padding:34px clamp(20px,4vw,56px);
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px;
+    font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--muted-2);
+    max-width:var(--maxw); margin:0 auto;
+  }
+  footer a{ text-decoration:none; color:var(--muted); }
+  footer a:hover{ color:var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="rail left" aria-hidden="true"></div>
+<div class="rail right" aria-hidden="true"></div>
+
+<div class="frame">
+
+<header>
+  <!-- Чтобы поставить свой логотип-картинку вместо текста, замените строку ниже на:
+       <a href="#top" class="logo"><img src="logo.svg" alt="Дмитрий — уличная фотография"></a>
+       Файл логотипа (logo.svg / logo.png) положите рядом с index.html -->
+  <a href="#top" class="logo">Д<span>·</span>МИТРИЙ</a>
+  <button class="nav-toggle" id="navToggle" aria-label="Открыть меню">☰</button>
+  <nav id="nav">
+    <a href="#about">О фотографе</a>
+    <a href="#statement">Декларация</a>
+    <a href="#gallery">Работы</a>
+    <a href="#services">Услуги</a>
+    <a href="#contact">Контакты</a>
+    <a class="tg" href="https://t.me/experement0" target="_blank" rel="noopener">Telegram →</a>
+  </nav>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="top">
+  <div class="hero-frame-tag mono">
+    <span><span class="dot"></span>KADR 001 / 036</span>
+    <span>БРУТАЛИЗМ · ЗАКАТНЫЙ СВЕТ</span>
+  </div>
+  <h1>Монументальность<br>с <em>трещинами</em>.</h1>
+  <p>Жёсткие формы города в мягком, насыщенном свете заката — момент, когда привычный мир слегка отслаивается от реальности. Пространство здесь всегда больше человека.</p>
+  <div class="hero-cta">
+    <a href="#gallery" class="btn btn-primary">Смотреть контрольный лист</a>
+    <a href="#contact" class="btn btn-ghost">Обсудить съёмку</a>
+  </div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section id="about">
+  <div class="about reveal">
+    <div class="about-portrait">
+      <div class="corner-tag mono">FRAME 00 / PORTRAIT</div>
+    </div>
+    <div class="about-body">
+      <div class="eyebrow">О фотографе</div>
+      <h2 class="section-title" style="margin-bottom:22px;">Взгляд, а не фильтр</h2>
+      <p>Я хожу по городу с одной камерой и без плана — жду момент, когда свет, фигура и фон встают в одну композицию сами. Меня интересует не «красивая картинка», а честность кадра: то, что действительно произошло на этой улице в эту секунду.</p>
+      <div class="about-quote">«Пространство в моих работах всегда шире и доминантнее человека.»</div>
+      <p>Веду телеграм-канал, где разбираю свои и чужие кадры, объясняю решения по свету и композиции — если хотите смотреть на город моими глазами, заходите туда.</p>
+      <div class="about-stats">
+        <div><b>04</b><span>года практики</span></div>
+        <div><b>230+</b><span>кадров в портфолио</span></div>
+        <div><b>12</b><span>городов съёмки</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ARTIST STATEMENT ================= -->
+<section id="statement" class="statement">
+  <div class="statement-glow" aria-hidden="true"></div>
+  <div class="statement-body reveal">
+    <div class="eyebrow">Декларация артиста</div>
+    <h2 class="section-title">Монументальность с трещинами</h2>
+    <p class="statement-intro">Ниже — не био, а координаты: как я вижу кадр и что в нём ищу. Компас для тех, кто хочет понимать работу, а не просто листать ленту.</p>
+
+    <div class="statement-grid">
+      <div class="statement-block">
+        <span class="statement-label">Визуальный язык</span>
+        <p>Крупные, статичные формы — архитектура, геометрия улиц, эхо промышленных эпох — кажутся незыблемыми, но уже несут отпечаток времени. Я помещаю жёсткие структуры в мягкий, насыщенный свет заката или рассвета: он сглаживает агрессию среды и создаёт лёгкую дереализацию — момент, когда привычный мир будто отслаивается от реальности. Пространство в кадре всегда шире и доминантнее человека; если он появляется — то со спины, растворяясь в среде и оставаясь замеченным лишь по одной контрастной детали.</p>
+      </div>
+      <div class="statement-block">
+        <span class="statement-label">Темы исследования</span>
+        <p>В центре внимания — хрупкость ожиданий, светлая тоска и эстетика незавершённого величия: состояние человека, пережившего кризис и столкнувшегося с апатичной реальностью. Мои кадры — попытка уйти в «хорошую иллюзию» от грязной повседневности, зафиксировать крах завышенных надежд и найти красоту в том, что задумывалось великим, но так и не увидело свет. Это манифестация неотвратимого бега времени и лёгкого отчуждения от бурлящей городской жизни.</p>
+      </div>
+    </div>
+
+    <p class="statement-pull">Моя миссия — находить <em>монументальность с трещинами</em>: там, где через разломы раскрывается то светлое, что спрятано глубоко внутри человека.</p>
+
+    <div class="values-list">
+      <div class="value-item">
+        <h4>Гуманизм и эмпатия</h4>
+        <p>Попытка понять другого человека, примерить на себя его внутреннее одиночество.</p>
+      </div>
+      <div class="value-item">
+        <h4>Искренность в уязвимости</h4>
+        <p>Отказ от «жизни в розовых очках» и фальшивого блеска в пользу честной, тихой меланхолии.</p>
+      </div>
+      <div class="value-item">
+        <h4>Визуальное замедление</h4>
+        <p>Пространство для внутренних размышлений зрителя и выход из бесконечного потока цифрового шума.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= GALLERY ================= -->
+<section id="gallery">
+  <div class="sheet-head reveal">
+    <div>
+      <div class="eyebrow">Контрольный лист</div>
+      <h2 class="section-title">Избранные кадры</h2>
+    </div>
+    <div class="mono">НАВЕДИТЕ, ЧТОБЫ ОТМЕТИТЬ СЕЛЕКТ</div>
+  </div>
+
+  <div class="sheet-filters reveal" role="tablist">
+    <button class="filter-tab active" data-filter="all">Все</button>
+    <button class="filter-tab" data-filter="street">Стрит</button>
+    <button class="filter-tab" data-filter="event">Мероприятия</button>
+    <button class="filter-tab" data-filter="personal">Личные фотосеты</button>
+    <button class="filter-tab" data-filter="student">Для студентов</button>
+  </div>
+
+  <div class="contact-sheet reveal">
+    <!-- Каждая ячейка — один кадр. Чтобы добавить фото: замените <div class="ph">…</div>
+         на <img class="ph" src="photos/street/01.jpg" alt="описание кадра">
+         data-category управляет фильтром: street / event / personal / student -->
+    <div class="frame-cell" data-category="street"><div class="frame-num mono">01A</div><div class="ph"><span>ЗАМЕНИТЕ<br>НА ФОТО</span></div><div class="select-mark"></div><div class="frame-cap">Тверская, 07:40 · 35mm f/2</div></div>
+    <div class="frame-cell" data-category="street"><div class="frame-num mono">02A</div><div class="ph"><span>ЗАМЕНИТЕ<br>НА ФОТО</span></div><div class="select-mark"></div><div class="frame-cap">Метро, 18:12 · 50mm f/1.8</div></div>
+    <div class="frame-cell" data-category="event"><div class="frame-num mono">03A</div><div class="ph"><span>ЗАМЕНИТЕ<br>НА ФОТО</span></div><div class="select-mark"></div><div class="frame-cap">Свадьба, тост · 24mm f/2.8</div></div>
+    <div class="frame-cell" data-category="personal"><div class="frame-num mono">04A</div><div class="ph"><span>ЗАМЕНИТЕ<br>НА ФОТО</span></div><div class="select-mark"></div><div class="frame-cap">Портрет, двор · 50mm f/1.8</div></div>
+    <div class="frame-cell" data-category="street"><div class="frame-num mono">05A</div><div class="ph"><span>ЗАМЕНИТЕ<br>НА ФОТО</span></div><div class="select-mark"></div><div class="frame-cap">Мост, закат · 35mm f/5.6</div></div>
+    <div class="frame-cell" data-category="student"><div class="frame-num mono">06A</div><div class="ph"><span>ЗАМЕНИТЕ<br>НА ФОТО</span></div><div class="select-mark"></div><div class="frame-cap">Выпускной, кампус · 35mm f/2</div></div>
+    <div class="frame-cell" data-category="event"><div class="frame-num mono">07A</div><div class="ph"><span>ЗАМЕНИТЕ<br>НА ФОТО</span></div><div class="select-mark"></div><div class="frame-cap">Конференция, кулуары · 35mm f/2.8</div></div>
+    <div class="frame-cell" data-category="personal"><div class="frame-num mono">08A</div><div class="ph"><span>ЗАМЕНИТЕ<br>НА ФОТО</span></div><div class="select-mark"></div><div class="frame-cap">Портрет на крыше, закат · 50mm f/2</div></div>
+    <div class="frame-cell frame-blank" data-category="_blank"><div class="frame-num mono">—</div><div class="ph"><span>ПУСТОЙ<br>КАДР</span></div></div>
+  </div>
+</section>
+
+<!-- ================= SERVICES ================= -->
+<section id="services">
+  <div class="reveal">
+    <div class="eyebrow">Услуги</div>
+    <h2 class="section-title">Чем могу быть полезен</h2>
+  </div>
+
+  <div class="services-grid reveal">
+    <div class="service-card">
+      <span class="service-num mono">01</span>
+      <h3>Съёмка мероприятий</h3>
+      <p>Свадьбы, дни рождения, конференции, городские события. Не расставляю людей — ловлю живую ткань момента, которая останется, когда декорации уберут.</p>
+      <div class="service-price">от 8 000 ₽ / до 3 часов</div>
+    </div>
+    <div class="service-card">
+      <span class="service-num mono">02</span>
+      <h3>Личные фотосеты</h3>
+      <p>Портретная съёмка в городской среде — без студийного глянца. В кадре вы существуете в пространстве, а не позируете на его фоне.</p>
+      <div class="service-price">от 5 000 ₽ / 1.5 часа, 15–20 кадров</div>
+    </div>
+    <div class="service-card">
+      <span class="service-num mono">03</span>
+      <h3>Съёмка для студентов</h3>
+      <p>Выпускной, портфолио, проект для учёбы. Сам студент — понимаю бюджет и сроки, снимаю быстро и без лишнего пафоса.</p>
+      <div class="service-price">скидка 20% по студенческому билету</div>
+    </div>
+    <div class="service-card">
+      <span class="service-num mono">04</span>
+      <h3>Фотопрогулка по городу</h3>
+      <p>Два часа съёмки вместе: показываю, как я ищу свет и момент, вы уходите с готовыми кадрами и новым взглядом на привычные улицы.</p>
+      <div class="service-price">от 4 500 ₽ / 2 часа</div>
+    </div>
+    <div class="service-card">
+      <span class="service-num mono">05</span>
+      <h3>Съёмка для бренда и соцсетей</h3>
+      <p>Живые, неспостановочные кадры продукта или команды в городской среде — без глянцевой искусственности студийного света.</p>
+      <div class="service-price">от 12 000 ₽ / проект</div>
+    </div>
+    <div class="service-card">
+      <span class="service-num mono">06</span>
+      <h3>Разбор и консультация</h3>
+      <p>Присылаете подборку своих кадров — разбираю композицию, свет и монтаж серии, даю честную обратную связь.</p>
+      <div class="service-price">от 2 000 ₽ / серия</div>
+    </div>
+    <div class="service-card wide">
+      <span class="service-num mono">07</span>
+      <h3>Печать и подборка кадров</h3>
+      <p>Помогу отобрать и подготовить серию к печати — от контрольного листа до финальной обработки в Lightroom.</p>
+      <div class="service-price">по договорённости</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONTACT ================= -->
+<section id="contact">
+  <div class="reveal">
+    <div class="eyebrow">Контакты</div>
+    <h2 class="section-title">Обсудим съёмку</h2>
+  </div>
+
+  <div class="contact-wrap reveal" style="margin-top:44px;">
+    <form onsubmit="event.preventDefault(); alert('Форма — заглушка. Подключите свою почту или Telegram-бота для приёма заявок.');">
+      <div class="field">
+        <label for="name">Имя</label>
+        <input id="name" type="text" placeholder="Как к вам обращаться" required>
+      </div>
+      <div class="field">
+        <label for="contact">Telegram или e-mail</label>
+        <input id="contact" type="text" placeholder="@username или Stan.godin@yandex.ru" required>
+      </div>
+      <div class="field">
+        <label for="service">Интересует</label>
+        <select id="service">
+          <option>Мероприятие</option>
+          <option>Личный фотосет</option>
+          <option>Для студентов</option>
+          <option>Фотопрогулка</option>
+          <option>Съёмка для бренда</option>
+          <option>Разбор кадров</option>
+          <option>Печать</option>
+          <option>Другое</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="msg">Сообщение</label>
+        <textarea id="msg" placeholder="Расскажите, что хотите снять"></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit" style="width:100%; justify-content:center;">Отправить заявку</button>
+    </form>
+
+    <div class="contact-info">
+      <div class="row"><span>Telegram-канал</span><a href="https://t.me/your_channel" target="_blank" rel="noopener">@your_channel →</a></div>
+      <div class="row"><span>Почта</span><a href="mailto:mail@mail.ru">mail@mail.ru</a></div>
+      <div class="row"><span>Город съёмки</span><span>Москва и область</span></div>
+      <div class="row"><span>Ответ</span><span>обычно в течение суток</span></div>
+      <p class="contact-note">Форма выше — заглушка: чтобы заявки приходили вам, подключите её к почте (например, через Formspree) или к Telegram-боту. Также замените ссылку на канал и почту на свои.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 Дмитрий · уличная фотография</span>
+  <span>Сайт — контрольный лист вашего города</span>
+</footer>
+
+</div>
+
+<script>
+  // Мобильное меню
+  const toggle = document.getElementById('navToggle');
+  const nav = document.getElementById('nav');
+  toggle?.addEventListener('click', () => nav.classList.toggle('open'));
+  nav?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('open')));
+
+  // Scroll reveal
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Фильтр галереи по типу съёмки
+  const tabs = document.querySelectorAll('.filter-tab');
+  const cells = document.querySelectorAll('.frame-cell');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const filter = tab.dataset.filter;
+      cells.forEach(cell => {
+        const cat = cell.dataset.category;
+        const show = filter === 'all' ? true : cat === filter;
+        cell.style.display = show ? '' : 'none';
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
