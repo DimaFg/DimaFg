@@ -16,6 +16,30 @@
 | 17. Инфраструктура | Dockerfile'ы, Compose (db, migrate, api ×2 процесса, worker, web, caddy), healthcheck'и |
 | 18. CI | GitHub Actions: ruff, pytest на PostgreSQL, `alembic check`, актуальность OpenAPI и типов, tsc, eslint, сборка |
 
+## Сверка с attendance-bot (Arsgaz/attendance-bot)
+
+Взято из него:
+
+- **Утечка персональных данных в логи — найдена и исправлена.** Исключения SQLAlchemy включали значения запроса (имя, контакт, сообщение заявки), а обработчик ошибок писал traceback в лог. Теперь `hide_parameters=True`, есть регрессионный тест.
+- Фильтр полей лога по образцу `observability/privacy.py`.
+- `SecretStr` для токенов и паролей.
+- Heartbeat worker'а и healthcheck контейнера (`python -m app.cli healthcheck`), который проверяет БД, совпадение ревизии Alembic с кодом и свежесть heartbeat. Зависший worker теперь становится `unhealthy`.
+- В Compose: `init: true`, ротация json-логов, `start_period`.
+- Настраиваемые параметры повторов outbox (`OUTBOX_RETRY_BASE_SECONDS`, `OUTBOX_RETRY_MAX_SECONDS`, `OUTBOX_LOCK_TIMEOUT_SECONDS`).
+- `SECURITY.md`.
+
+Взять на этапе Production:
+
+- **Резервное копирование.** Их сервис `backup` — образец: проверка целостности перед упаковкой, хранение 7 ежедневных и 4 еженедельных снимков, `pre-restore` снимок перед восстановлением, heartbeat и тесты. Для нас — то же поверх `pg_dump` с выгрузкой копий вне VPS.
+
+Сознательно не перенесено:
+
+- Слоистая DDD-архитектура (domain/port/adapter, Dishka). Боту она нужна из-за двух клиентов и Google Sheets; для сайта ТЗ требует модульный монолит, и лишние слои здесь только добавят кода.
+- structlog. Наш JSON-логгер на stdlib покрывает те же задачи без зависимости.
+- SQLite: у нас PostgreSQL по ТЗ.
+
+У нас уже есть то, что у них ещё в плане: CI с `alembic check`, graceful shutdown worker'а, дедупликация повторных запросов, непривилегированный пользователь в Docker-образе.
+
 ## Следующие этапы
 
 1. **Медиа**: S3 presigned upload, worker обработки (проверка, удаление EXIF/GPS, sRGB, 320–2400 px в AVIF/WebP/JPEG, placeholder), CDN. Модели `photos`/`photo_variants` и рендер `<picture>` со `srcset` уже готовы — фронтенд покажет реальные кадры, как только у них появятся `sources`.

@@ -85,6 +85,26 @@ def cmd_openapi(_args) -> None:
     print(json.dumps(create_app().openapi(), ensure_ascii=False, indent=2))
 
 
+def cmd_healthcheck(args) -> None:
+    from app.core.config import get_settings
+    from app.core.db import engine
+    from app.core.health import check_database
+    from app.core.heartbeat import ensure_fresh_heartbeat, heartbeat_path
+
+    settings = get_settings()
+    try:
+        result: dict[str, object] = {"service": args.service, "revision": check_database(engine)}
+        if args.service == "worker":
+            # Запас на долгую отправку: SMTP-таймаут 15 с + HTTP-таймаут Telegram 10 с.
+            max_age = max(60.0, settings.worker_poll_seconds * 3)
+            path = heartbeat_path(settings.heartbeat_dir, "worker")
+            result["heartbeat_age_seconds"] = round(ensure_fresh_heartbeat(path, max_age), 1)
+    except Exception as exc:
+        print(json.dumps({"status": "error", "service": args.service, "error": str(exc)}))
+        sys.exit(1)
+    print(json.dumps({"status": "ok", **result}))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(prog="app.cli")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -97,6 +117,9 @@ def main() -> None:
     sub.add_parser("seed").set_defaults(func=cmd_seed)
     sub.add_parser("worker").set_defaults(func=cmd_worker)
     sub.add_parser("openapi").set_defaults(func=cmd_openapi)
+    p = sub.add_parser("healthcheck")
+    p.add_argument("--service", choices=["api", "worker"], required=True)
+    p.set_defaults(func=cmd_healthcheck)
     args = parser.parse_args()
     args.func(args)
 

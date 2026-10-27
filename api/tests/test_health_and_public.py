@@ -78,3 +78,22 @@ def test_portfolio_rejects_bad_filter(client):
     r = client.get("/api/v1/portfolio", params={"category": "DROP TABLE"})
     assert r.status_code == 422
     assert "category" in r.json()["error"]["fields"]
+
+
+def test_ready_reports_revision(client):
+    assert client.get("/api/health/ready").json()["revision"] == "0001"
+
+
+def test_ready_fails_on_revision_mismatch(client):
+    from sqlalchemy import text
+
+    from app.core.db import engine
+
+    with engine.begin() as conn:
+        conn.execute(text("UPDATE alembic_version SET version_num = 'stale'"))
+    try:
+        r = client.get("/api/health/ready")
+        assert r.status_code == 503
+    finally:
+        with engine.begin() as conn:
+            conn.execute(text("UPDATE alembic_version SET version_num = '0001'"))

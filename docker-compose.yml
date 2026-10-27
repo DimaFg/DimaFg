@@ -2,6 +2,16 @@
 # Наружу публикуются только 80/443 Caddy. PostgreSQL, api и worker доступны лишь во внутренней сети.
 name: photo-site
 
+# Общие настройки процессов: init пересылает сигналы и собирает зомби-процессы,
+# ротация json-логов не даёт им заполнить диск VPS.
+x-runtime: &runtime
+  init: true
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "5"
+
 x-api-env: &api-env
   ENVIRONMENT: ${ENVIRONMENT:-local}
   DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-photo}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-photo}
@@ -17,9 +27,14 @@ x-api-env: &api-env
   NOTIFY_EMAIL_FROM: ${NOTIFY_EMAIL_FROM:-}
   NOTIFY_EMAIL_TO: ${NOTIFY_EMAIL_TO:-}
   ADMIN_BASE_URL: ${SITE_URL:-http://localhost}/admin
+  OUTBOX_MAX_ATTEMPTS: ${OUTBOX_MAX_ATTEMPTS:-8}
+  OUTBOX_RETRY_BASE_SECONDS: ${OUTBOX_RETRY_BASE_SECONDS:-30}
+  OUTBOX_RETRY_MAX_SECONDS: ${OUTBOX_RETRY_MAX_SECONDS:-3600}
+  OUTBOX_LOCK_TIMEOUT_SECONDS: ${OUTBOX_LOCK_TIMEOUT_SECONDS:-600}
 
 services:
   db:
+    <<: *runtime
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -35,6 +50,7 @@ services:
 
   # Миграции выполняются один раз перед запуском новой версии, а не каждым worker-процессом.
   migrate:
+    <<: *runtime
     build: ./api
     command: ["sh", "-c", "alembic upgrade head && python -m app.cli seed"]
     environment: *api-env
@@ -43,26 +59,38 @@ services:
     restart: "no"
 
   api:
+    <<: *runtime
     build: ./api
     restart: unless-stopped
     environment: *api-env
     depends_on:
       migrate: { condition: service_completed_successfully }
+    # БД доступна и её ревизия совпадает с миграциями в образе.
     healthcheck:
-      # ProxyHandler({}) — запрос к localhost не должен уходить через HTTP(S)_PROXY окружения
-      test: ["CMD", "python", "-c", "import urllib.request as u; u.build_opener(u.ProxyHandler({})).open('http://127.0.0.1:8000/api/health/ready', timeout=5)"]
-      interval: 15s
+      test: ["CMD", "python", "-m", "app.cli", "healthcheck", "--service", "api"]
+      interval: 30s
+      timeout: 10s
       retries: 3
+      start_period: 20s
 
   worker:
+    <<: *runtime
     build: ./api
     command: ["python", "-m", "app.cli", "worker"]
     restart: unless-stopped
     environment: *api-env
     depends_on:
       migrate: { condition: service_completed_successfully }
+    # Плюс свежесть heartbeat: зависший цикл обработки делает контейнер unhealthy.
+    healthcheck:
+      test: ["CMD", "python", "-m", "app.cli", "healthcheck", "--service", "worker"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
   web:
+    <<: *runtime
     build:
       context: ./web
       args:
@@ -77,6 +105,7 @@ services:
       API_INTERNAL_URL: http://api:8000
 
   caddy:
+    <<: *runtime
     image: caddy:2-alpine
     restart: unless-stopped
     ports:

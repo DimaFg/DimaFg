@@ -14,6 +14,7 @@ from sqlalchemy import or_, select, update
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import get_settings
+from app.core.heartbeat import heartbeat_path, write_heartbeat
 from app.core.logging import log_event
 from app.modules.leads.models import Lead, NotificationStatus
 from app.modules.notifications.models import OutboxStatus, OutboxTask
@@ -27,8 +28,6 @@ from app.modules.services.models import Service
 
 log = logging.getLogger("app.worker")
 
-STALE_LOCK = timedelta(minutes=10)
-
 
 class PermanentError(Exception):
     pass
@@ -39,18 +38,21 @@ def _now() -> datetime:
 
 
 def backoff(attempts: int) -> timedelta:
-    return timedelta(seconds=min(30 * 2 ** (attempts - 1), 3600))
+    s = get_settings()
+    delay = s.outbox_retry_base_seconds * 2 ** max(0, attempts - 1)
+    return timedelta(seconds=min(delay, s.outbox_retry_max_seconds))
 
 
 def claim_task(db: Session) -> OutboxTask | None:
     now = _now()
+    stale_lock = timedelta(seconds=get_settings().outbox_lock_timeout_seconds)
     candidate = (
         select(OutboxTask.id)
         .where(
             or_(
                 (OutboxTask.status == OutboxStatus.pending) & (OutboxTask.run_after <= now),
                 (OutboxTask.status == OutboxStatus.processing)
-                & (OutboxTask.locked_at < now - STALE_LOCK),
+                & (OutboxTask.locked_at < now - stale_lock),
             )
         )
         .order_by(OutboxTask.run_after, OutboxTask.id)
@@ -189,9 +191,11 @@ def run_forever(session_factory: sessionmaker) -> None:
     signal.signal(signal.SIGINT, _stop)
     log_event(log, "worker started", channels=[s.channel for s in senders])
 
+    heartbeat = heartbeat_path(settings.heartbeat_dir, "worker")
     last_housekeeping = 0.0
     while not stopping:
         try:
+            write_heartbeat(heartbeat)
             if time.monotonic() - last_housekeeping > 3600:
                 purged = purge_expired_ip_hashes(session_factory)
                 log_event(log, "housekeeping", purged_ip_hashes=purged)

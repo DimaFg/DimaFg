@@ -100,7 +100,10 @@ class EmailSender:
                 if self.s.smtp_starttls:
                     smtp.starttls()
                 if self.s.smtp_user:
-                    smtp.login(self.s.smtp_user, self.s.smtp_password or "")
+                    password = (
+                        self.s.smtp_password.get_secret_value() if self.s.smtp_password else ""
+                    )
+                    smtp.login(self.s.smtp_user, password)
                 smtp.send_message(msg)
         except (OSError, smtplib.SMTPException) as exc:
             raise TemporaryError(f"smtp error: {type(exc).__name__}") from exc
@@ -118,7 +121,11 @@ class LogSender:
 def configured_senders(settings: Settings) -> list[Sender]:
     senders: list[Sender] = []
     if settings.telegram_bot_token and settings.telegram_chat_id:
-        senders.append(TelegramSender(settings.telegram_bot_token, settings.telegram_chat_id))
+        senders.append(
+            TelegramSender(
+                settings.telegram_bot_token.get_secret_value(), settings.telegram_chat_id
+            )
+        )
     if settings.smtp_host and settings.notify_email_from and settings.notify_email_to:
         senders.append(EmailSender(settings))
     return senders or [LogSender()]

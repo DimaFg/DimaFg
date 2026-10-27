@@ -28,7 +28,11 @@ class TimestampMixin:
     )
 
 
-engine = create_engine(get_settings().database_url, pool_pre_ping=True, pool_size=5)
+# hide_parameters: иначе текст исключений SQLAlchemy содержит значения запроса — имя, контакт
+# и сообщение из заявки — и они попадают в логи вместе с traceback.
+engine = create_engine(
+    get_settings().database_url, pool_pre_ping=True, pool_size=5, hide_parameters=True
+)
 SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
 
 
