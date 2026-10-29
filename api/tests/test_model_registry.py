@@ -10,7 +10,7 @@ def test_app_import_registers_all_models():
     code = (
         "import app.main\n"
         "from sqlalchemy.orm import configure_mappers\n"
-        "from app.core.db import Base\n"
+        "from app.adapter.database.base import Base\n"
         "configure_mappers()\n"
         "for t in Base.metadata.sorted_tables:\n"
         "    for fk in t.foreign_keys:\n"

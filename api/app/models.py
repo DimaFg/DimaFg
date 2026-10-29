@@ -1,12 +1,12 @@
 """Импорт всех моделей, чтобы Alembic видел полную схему."""
 
-from app.core.db import Base
-from app.modules.audit.models import AuditLog
-from app.modules.auth.models import Admin, AdminSession
-from app.modules.leads.models import Lead, LeadStatusHistory
-from app.modules.notifications.models import OutboxTask
-from app.modules.portfolio.models import Photo, PhotoCategory, PhotoVariant
-from app.modules.services.models import Service
+from app.adapter.database.base import Base
+from app.adapter.database.models.audit import AuditLog
+from app.adapter.database.models.auth import Admin, AdminSession
+from app.adapter.database.models.leads import Lead, LeadStatusHistory
+from app.adapter.database.models.outbox import OutboxTask
+from app.adapter.database.models.portfolio import Photo, PhotoCategory, PhotoVariant
+from app.adapter.database.models.services import Service
 
 __all__ = [
     "Admin",

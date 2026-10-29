@@ -1,6 +1,11 @@
 from datetime import UTC, datetime
 
-from app.modules.portfolio.models import Photo, PhotoCategory, PhotoVariant, ProcessingStatus
+from app.adapter.database.models.portfolio import (
+    Photo,
+    PhotoCategory,
+    PhotoVariant,
+    ProcessingStatus,
+)
 
 
 def test_health(client):
@@ -15,7 +20,7 @@ def test_request_id_is_returned(client):
 
 
 def test_services_sorted_and_active_only(client, db):
-    from app.modules.services.models import Service
+    from app.adapter.database.models.services import Service
 
     db.query(Service).filter(Service.slug == "print").update({"is_active": False})
     db.commit()
@@ -87,7 +92,7 @@ def test_ready_reports_revision(client):
 def test_ready_fails_on_revision_mismatch(client):
     from sqlalchemy import text
 
-    from app.core.db import engine
+    from app.adapter.database.base import engine
 
     with engine.begin() as conn:
         conn.execute(text("UPDATE alembic_version SET version_num = 'stale'"))

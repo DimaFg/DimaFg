@@ -1,10 +1,13 @@
 import uuid
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 
+import pytest
 from sqlalchemy import select
 
-from app.modules.leads.contact import classify_contact
-from app.modules.leads.models import ContactType, Lead, LeadStatus, NotificationStatus
-from app.modules.notifications.models import OutboxTask
+from app.adapter.database.models.leads import ContactType, Lead, LeadStatus, NotificationStatus
+from app.adapter.database.models.outbox import OutboxTask
+from app.domain.leads.contact import classify_contact
 
 
 def test_create_lead_persists_with_outbox(client, db, lead_payload):
@@ -118,3 +121,124 @@ def test_classify_contact():
     assert classify_contact("https://t.me/dmitry_photo")[0] == ContactType.telegram
     assert classify_contact("8 (916) 123-45-67") == (ContactType.phone, "+79161234567")
     assert classify_contact("ВКонтакте: id1")[0] == ContactType.other
+
+
+def test_same_message_for_different_services_creates_two_leads(client, db, lead_payload):
+    assert client.post("/api/v1/leads", json=lead_payload).status_code == 201
+    response = client.post("/api/v1/leads", json={**lead_payload, "service": "other"})
+    assert response.status_code == 201
+    assert len(db.scalars(select(Lead)).all()) == 2
+
+
+def test_unknown_service_is_rejected_even_if_message_matches(client, lead_payload):
+    client.post("/api/v1/leads", json=lead_payload)
+    response = client.post("/api/v1/leads", json={**lead_payload, "service": "unknown"})
+    assert response.status_code == 422
+
+
+def test_duplicate_without_key_is_returned_after_contact_limit(client, lead_payload):
+    for i in range(3):
+        response = client.post("/api/v1/leads", json={**lead_payload, "message": f"m{i}"})
+        assert response.status_code == 201
+    response = client.post("/api/v1/leads", json={**lead_payload, "message": "m0"})
+    assert response.status_code == 200
+
+
+def test_duplicate_without_key_is_returned_after_ip_limit(client, lead_payload):
+    for i in range(5):
+        response = client.post("/api/v1/leads", json={**lead_payload, "contact": f"u{i}@mail.ru"})
+        assert response.status_code == 201
+    response = client.post("/api/v1/leads", json={**lead_payload, "contact": "u0@mail.ru"})
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize("with_key", [False, True])
+def test_parallel_submissions_are_deduplicated(client, db, lead_payload, with_key):
+    barrier = Barrier(4)
+    key = str(uuid.uuid4())
+    payload = {**lead_payload, "message": str(uuid.uuid4())}
+
+    def submit(_):
+        barrier.wait(timeout=10)
+        return client.post(
+            "/api/v1/leads",
+            json=payload,
+            headers={"Idempotency-Key": key} if with_key else {},
+        )
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        responses = list(pool.map(submit, range(4)))
+    assert sorted(r.status_code for r in responses) == [200, 200, 200, 201]
+    assert len({r.json()["public_number"] for r in responses}) == 1
+    assert len(db.scalars(select(Lead)).all()) == 1
+    assert len(db.scalars(select(OutboxTask)).all()) == 1
+
+
+def test_parallel_rate_limit_is_not_exceeded(client, db, lead_payload):
+    barrier = Barrier(6)
+
+    def submit(i):
+        barrier.wait(timeout=10)
+        return client.post(
+            "/api/v1/leads",
+            json={**lead_payload, "contact": f"parallel{i}@example.com"},
+        )
+
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        responses = list(pool.map(submit, range(6)))
+    assert sorted(r.status_code for r in responses) == [201] * 5 + [429]
+    assert len(db.scalars(select(Lead)).all()) == 5
+
+
+def test_legitimate_submission_is_not_deduplicated_against_spam(client, db, lead_payload):
+    first = client.post("/api/v1/leads", json={**lead_payload, "elapsed_ms": 1})
+    second = client.post("/api/v1/leads", json=lead_payload)
+    assert first.status_code == second.status_code == 201
+    assert first.json()["public_number"] != second.json()["public_number"]
+    assert {lead.status for lead in db.scalars(select(Lead))} == {LeadStatus.spam, LeadStatus.new}
+    assert len(db.scalars(select(OutboxTask)).all()) == 1
+
+
+def test_outbox_failure_rolls_back_lead_and_history(db, monkeypatch):
+    from app.adapter.database.leads import SQLAlchemyOutboxWriter
+    from app.adapter.database.models.leads import LeadStatusHistory
+    from app.application.leads.create import CreateLeadCommand
+    from app.di.leads import get_create_lead
+
+    def fail(*args):
+        raise RuntimeError("outbox unavailable")
+
+    monkeypatch.setattr(SQLAlchemyOutboxWriter, "enqueue", fail)
+    with pytest.raises(RuntimeError, match="outbox unavailable"):
+        get_create_lead(db)(CreateLeadCommand(name="Анна", contact="@anna_photo"))
+    assert db.scalars(select(Lead)).all() == []
+    assert db.scalars(select(LeadStatusHistory)).all() == []
+
+
+def test_same_key_is_serialized_even_for_different_contacts_and_ips(db):
+    from app.adapter.database.base import SessionLocal
+    from app.application.leads.create import CreateLeadCommand
+    from app.di.leads import get_create_lead
+
+    barrier = Barrier(4)
+    key = str(uuid.uuid4())
+
+    def submit(i):
+        with SessionLocal() as session:
+            handler = get_create_lead(session)
+            barrier.wait(timeout=10)
+            return handler(
+                CreateLeadCommand(
+                    name="Анна",
+                    contact=f"parallel{i}@example.com",
+                    ip_hash=f"ip-{i}",
+                    idempotency_key=key,
+                )
+            )
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        results = list(pool.map(submit, range(4)))
+    assert sum(result.created for result in results) == 1
+    assert len({result.lead.public_number for result in results}) == 1
+    assert len(db.scalars(select(Lead)).all()) == 1
+    assert len(db.scalars(select(OutboxTask)).all()) == 1

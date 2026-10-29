@@ -6,8 +6,8 @@ from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.modules.portfolio.models import PhotoCategory
-from app.modules.services.models import Service
+from app.adapter.database.models.portfolio import PhotoCategory
+from app.adapter.database.models.services import Service
 
 DATA = Path(__file__).with_name("data.json")
 

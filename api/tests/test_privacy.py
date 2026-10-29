@@ -5,9 +5,9 @@ from datetime import UTC, datetime
 import pytest
 from sqlalchemy.exc import IntegrityError
 
+from app.adapter.database.models.leads import ContactType, Lead
 from app.core.heartbeat import StaleHeartbeatError, ensure_fresh_heartbeat, write_heartbeat
 from app.core.logging import JsonFormatter, log_event
-from app.modules.leads.models import ContactType, Lead
 
 
 def test_db_errors_do_not_contain_lead_data(client, db, lead_payload):

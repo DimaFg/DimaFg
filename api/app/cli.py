@@ -32,9 +32,9 @@ def _read_password() -> str:
 
 
 def cmd_create_admin(args) -> None:
-    from app.core.db import SessionLocal
-    from app.modules.auth.models import Admin
-    from app.modules.auth.passwords import hash_password
+    from app.adapter.database.base import SessionLocal
+    from app.adapter.database.models.auth import Admin
+    from app.adapter.security.passwords import hash_password
 
     email = args.email.strip().lower()
     with SessionLocal() as db:
@@ -46,9 +46,9 @@ def cmd_create_admin(args) -> None:
 
 
 def cmd_set_password(args) -> None:
-    from app.core.db import SessionLocal
-    from app.modules.auth.models import Admin, AdminSession
-    from app.modules.auth.passwords import hash_password
+    from app.adapter.database.base import SessionLocal
+    from app.adapter.database.models.auth import Admin, AdminSession
+    from app.adapter.security.passwords import hash_password
 
     email = args.email.strip().lower()
     with SessionLocal() as db:
@@ -64,7 +64,7 @@ def cmd_set_password(args) -> None:
 
 
 def cmd_seed(_args) -> None:
-    from app.core.db import SessionLocal
+    from app.adapter.database.base import SessionLocal
     from app.seed import seed
 
     with SessionLocal() as db:
@@ -72,8 +72,8 @@ def cmd_seed(_args) -> None:
 
 
 def cmd_worker(_args) -> None:
-    from app.core.db import SessionLocal
-    from app.modules.notifications.worker import run_forever
+    from app.adapter.database.base import SessionLocal
+    from app.adapter.outbox.worker import run_forever
 
     configure_logging()
     run_forever(SessionLocal)
@@ -86,8 +86,8 @@ def cmd_openapi(_args) -> None:
 
 
 def cmd_healthcheck(args) -> None:
+    from app.adapter.database.base import engine
     from app.core.config import get_settings
-    from app.core.db import engine
     from app.core.health import check_database
     from app.core.heartbeat import ensure_fresh_heartbeat, heartbeat_path
 

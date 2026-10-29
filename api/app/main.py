@@ -5,15 +5,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 import app.models  # noqa: F401 — регистрирует все модели (внешние ключи между модулями)
+from app.adapter.database.base import engine
 from app.core.config import get_settings
-from app.core.db import engine
-from app.core.errors import ErrorResponse, install_error_handlers
 from app.core.health import check_database
 from app.core.logging import configure_logging
-from app.core.middleware import RequestContextMiddleware
-from app.modules.leads.router import router as leads_router
-from app.modules.portfolio.router import router as portfolio_router
-from app.modules.services.router import router as services_router
+from app.presentation.http.errors import ErrorResponse, install_error_handlers
+from app.presentation.http.leads.router import router as leads_router
+from app.presentation.http.middleware import RequestContextMiddleware
+from app.presentation.http.portfolio.router import router as portfolio_router
+from app.presentation.http.services.router import router as services_router
 
 log = logging.getLogger("app.health")
 

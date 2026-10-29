@@ -12,12 +12,12 @@ from fastapi.testclient import TestClient  # noqa: E402
 from sqlalchemy import text  # noqa: E402
 
 from alembic import command  # noqa: E402
-from app.core.db import SessionLocal, engine  # noqa: E402
+from app.adapter.database.base import SessionLocal, engine  # noqa: E402
 from app.main import create_app  # noqa: E402
 from app.seed import seed  # noqa: E402
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="session")
 def _schema():
     with engine.begin() as conn:
         conn.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public;"))
@@ -25,8 +25,8 @@ def _schema():
     yield
 
 
-@pytest.fixture(autouse=True)
-def _clean_db():
+@pytest.fixture
+def _clean_db(_schema):
     with engine.begin() as conn:
         tables = conn.execute(
             text(
@@ -41,13 +41,13 @@ def _clean_db():
 
 
 @pytest.fixture
-def db():
+def db(_clean_db):
     with SessionLocal() as session:
         yield session
 
 
-@pytest.fixture(scope="session")
-def client():
+@pytest.fixture
+def client(_clean_db):
     with TestClient(create_app()) as c:
         yield c
 
