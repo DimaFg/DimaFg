@@ -12,9 +12,9 @@ export const metadata: Metadata = {
 
 // ЧЕРНОВИК. Перед production текст обязательно проверяет юрист с учётом юрисдикции владельца,
 // расположения серверов и фактически подключённых сервисов (ТЗ, раздел 14).
-const operator = process.env.NEXT_PUBLIC_PRIVACY_OPERATOR ?? "[ФИО или наименование оператора]";
-const retention = process.env.NEXT_PUBLIC_LEAD_RETENTION ?? "[срок хранения заявок]";
-const hosting = process.env.NEXT_PUBLIC_HOSTING_PROVIDER ?? "[хостинг-провайдер и страна размещения серверов]";
+const operator = process.env.NEXT_PUBLIC_PRIVACY_OPERATOR || "[ФИО или наименование оператора]";
+const retention = process.env.NEXT_PUBLIC_LEAD_RETENTION || "[срок хранения заявок]";
+const hosting = process.env.NEXT_PUBLIC_HOSTING_PROVIDER || "[хостинг-провайдер и страна размещения серверов]";
 
 export default function PrivacyPage() {
   return (
