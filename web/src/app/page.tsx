@@ -1,13 +1,14 @@
-import { About } from "@/components/About";
-import { ArtistStatement } from "@/components/ArtistStatement";
-import { ContactSection } from "@/components/ContactSection";
-import { Hero } from "@/components/Hero";
-import { JsonLd } from "@/components/JsonLd";
-import { Portfolio } from "@/components/Portfolio";
-import { Services } from "@/components/Services";
+import { About } from "@/components/home/About";
+import { ArtistStatement } from "@/components/home/ArtistStatement";
+import { ContactSection } from "@/features/leads/ui/ContactSection";
+import { Hero } from "@/components/home/Hero";
+import { JsonLd } from "@/shared/ui/JsonLd";
+import { Portfolio } from "@/features/portfolio/ui/Portfolio";
+import { Services } from "@/features/services/ui/Services";
 import { site } from "@/config/site";
-import { categories, photos } from "@/content/portfolio";
-import { services } from "@/content/services";
+import { catalog } from "@/lib/catalog";
+
+const { categories, photos, services } = catalog;
 
 export default function HomePage() {
   return (

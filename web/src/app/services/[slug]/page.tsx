@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { ContactSection } from "@/components/ContactSection";
-import { JsonLd } from "@/components/JsonLd";
-import { PageHero } from "@/components/PageHero";
-import { Portfolio } from "@/components/Portfolio";
+import { ContactSection } from "@/features/leads/ui/ContactSection";
+import { JsonLd } from "@/shared/ui/JsonLd";
+import { PageHero } from "@/shared/ui/PageHero";
+import { Portfolio } from "@/features/portfolio/ui/Portfolio";
 import { site } from "@/config/site";
-import { categories, getCategory, photosByCategory } from "@/content/portfolio";
-import { getService, services } from "@/content/services";
+import { catalog } from "@/lib/catalog";
+
+const { categories, getCategory, photosByCategory, getService, services } = catalog;
 
 export function generateStaticParams() {
   return services.map((s) => ({ slug: s.slug }));

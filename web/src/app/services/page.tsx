@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 
-import { ContactSection } from "@/components/ContactSection";
-import { PageHero } from "@/components/PageHero";
-import { Services } from "@/components/Services";
+import { ContactSection } from "@/features/leads/ui/ContactSection";
+import { PageHero } from "@/shared/ui/PageHero";
+import { Services } from "@/features/services/ui/Services";
 import { site } from "@/config/site";
-import { services } from "@/content/services";
+import { catalog } from "@/lib/catalog";
+
+const { services } = catalog;
 
 export const metadata: Metadata = {
   title: "Услуги и цены",

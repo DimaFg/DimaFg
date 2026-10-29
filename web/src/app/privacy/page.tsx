@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { PageHero } from "@/components/PageHero";
+import { PageHero } from "@/shared/ui/PageHero";
 import { site } from "@/config/site";
 
 export const metadata: Metadata = {

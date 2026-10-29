@@ -12,7 +12,13 @@ export function useFocusTrap(containers: RefObject<HTMLElement | null>[], active
     function onKeyDown(e: KeyboardEvent) {
       if (e.key !== "Tab") return;
       const items = containers
-        .flatMap((ref) => (ref.current ? Array.from(ref.current.querySelectorAll<HTMLElement>(FOCUSABLE)) : []))
+        .flatMap(({ current }) => {
+          if (!current) return [];
+          return [
+            ...(current.matches(FOCUSABLE) ? [current] : []),
+            ...Array.from(current.querySelectorAll<HTMLElement>(FOCUSABLE)),
+          ];
+        })
         .filter((el) => el.offsetParent !== null || el === document.activeElement);
       if (items.length === 0) return;
       const first = items[0];

@@ -1,22 +1,22 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, Inter, Oswald } from "next/font/google";
 
-import { AttributionCapture } from "@/components/AttributionCapture";
-import { FilmChrome } from "@/components/FilmChrome";
-import { Footer } from "@/components/Footer";
-import { Header } from "@/components/Header";
+import { AttributionCapture } from "@/features/leads/ui/AttributionCapture";
+import { FilmChrome } from "@/components/layout/FilmChrome";
+import { Footer } from "@/components/layout/Footer";
+import { Header } from "@/components/layout/Header";
 import { isProduction, site } from "@/config/site";
 
 import "@/styles/base.css";
-import "@/styles/header.css";
-import "@/styles/hero.css";
-import "@/styles/about.css";
-import "@/styles/statement.css";
-import "@/styles/portfolio.css";
-import "@/styles/lightbox.css";
-import "@/styles/services.css";
-import "@/styles/contact.css";
-import "@/styles/footer.css";
+import "@/components/layout/header.css";
+import "@/components/home/hero.css";
+import "@/components/home/about.css";
+import "@/components/home/statement.css";
+import "@/features/portfolio/ui/portfolio.css";
+import "@/features/portfolio/ui/lightbox.css";
+import "@/features/services/ui/services.css";
+import "@/features/leads/ui/contact.css";
+import "@/components/layout/footer.css";
 import "@/styles/pages.css";
 
 const oswald = Oswald({

@@ -1,5 +1,5 @@
 import { about } from "@/content/about";
-import { Reveal } from "./Reveal";
+import { Reveal } from "@/shared/ui/Reveal";
 
 export function About({ headingLevel = 2 }: { headingLevel?: 1 | 2 }) {
   const Heading = headingLevel === 1 ? "h1" : "h2";

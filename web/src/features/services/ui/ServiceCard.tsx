@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import { formatPrice } from "@/content/services";
-import type { Service } from "@/lib/types";
+import { formatPrice } from "@/features/services/model/format";
+import type { Service } from "@/features/services/model/types";
 
 export function ServiceCard({ service, wide = false }: { service: Service; wide?: boolean }) {
   return (

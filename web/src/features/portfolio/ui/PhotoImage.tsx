@@ -1,4 +1,4 @@
-import type { Photo } from "@/lib/types";
+import type { Photo } from "@/features/portfolio/model/types";
 
 const FORMAT_ORDER = ["avif", "webp"] as const;
 const MIME = { avif: "image/avif", webp: "image/webp", jpeg: "image/jpeg" } as const;

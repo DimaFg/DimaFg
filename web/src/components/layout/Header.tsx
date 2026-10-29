@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { site } from "@/config/site";
 import { navigation } from "@/content/about";
-import { useFocusTrap, useScrollLock } from "@/lib/a11y";
+import { useFocusTrap, useScrollLock } from "@/shared/lib/a11y";
 
 const MOBILE_QUERY = "(max-width: 700px)";
 

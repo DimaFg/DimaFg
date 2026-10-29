@@ -1,4 +1,4 @@
-import type { Photo, PhotoCategory } from "@/lib/types";
+import type { Photo, PhotoCategory } from "@/features/portfolio/model/types";
 
 // Совпадают с api/app/seed/data.json.
 export const categories: PhotoCategory[] = [

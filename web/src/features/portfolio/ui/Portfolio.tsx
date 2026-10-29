@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
-import type { Photo, PhotoCategory } from "@/lib/types";
+import type { Photo, PhotoCategory } from "@/features/portfolio/model/types";
 import { BlankFrame, PhotoCard } from "./PhotoCard";
 import { PhotoLightbox } from "./PhotoLightbox";
 import { ALL, PortfolioFilters } from "./PortfolioFilters";
-import { Reveal } from "./Reveal";
+import { Reveal } from "@/shared/ui/Reveal";
 
 const COLUMNS = 3;
 

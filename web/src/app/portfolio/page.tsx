@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 
-import { PageHero } from "@/components/PageHero";
-import { Portfolio } from "@/components/Portfolio";
-import { categories, photos } from "@/content/portfolio";
+import { PageHero } from "@/shared/ui/PageHero";
+import { Portfolio } from "@/features/portfolio/ui/Portfolio";
+import { catalog } from "@/lib/catalog";
+
+const { categories, photos } = catalog;
 
 export const metadata: Metadata = {
   title: "Портфолио",

@@ -1,4 +1,4 @@
-import type { Service } from "@/lib/types";
+import type { Service } from "@/features/services/model/types";
 
 // Тестовые данные из прототипа. Совпадают с api/app/seed/data.json; после запуска
 // админки услуг страницы будут собираться из GET /api/v1/services.
@@ -79,8 +79,4 @@ export const services: Service[] = [
 
 export function getService(slug: string): Service | undefined {
   return services.find((s) => s.slug === slug);
-}
-
-export function formatPrice(service: Service): string {
-  return service.durationText ? `${service.priceText} / ${service.durationText}` : service.priceText;
 }

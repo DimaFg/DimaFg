@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
-import { About } from "@/components/About";
-import { ArtistStatement } from "@/components/ArtistStatement";
+import { About } from "@/components/home/About";
+import { ArtistStatement } from "@/components/home/ArtistStatement";
 
 export const metadata: Metadata = {
   title: "О фотографе",

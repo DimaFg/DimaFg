@@ -1,4 +1,4 @@
-import type { Photo } from "@/lib/types";
+import type { Photo } from "@/features/portfolio/model/types";
 import { PhotoImage } from "./PhotoImage";
 
 const SIZES = "(max-width: 700px) 50vw, (max-width: 1180px) 33vw, 380px";

@@ -1,10 +1,10 @@
-import type { Service } from "@/lib/types";
+import type { LeadServiceOption } from "../model/form";
 import { ContactInformation } from "./ContactInformation";
 import { LeadForm } from "./LeadForm";
-import { Reveal } from "./Reveal";
+import { Reveal } from "@/shared/ui/Reveal";
 
 type Props = {
-  services: Service[];
+  services: LeadServiceOption[];
   defaultService?: string;
   title?: string;
   headingLevel?: 1 | 2;
@@ -21,7 +21,10 @@ export function ContactSection({ services, defaultService, title = "Обсуди
         </Heading>
       </Reveal>
       <Reveal className="contact-wrap">
-        <LeadForm services={services} defaultService={defaultService} />
+        <LeadForm
+          services={services.map(({ slug, formLabel }) => ({ slug, formLabel }))}
+          defaultService={defaultService}
+        />
         <ContactInformation />
       </Reveal>
     </section>

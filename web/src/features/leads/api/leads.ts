@@ -1,5 +1,5 @@
 import { site } from "@/config/site";
-import type { components } from "./schema";
+import type { components } from "@/lib/api/schema";
 
 export type LeadCreate = components["schemas"]["LeadCreate"];
 export type LeadCreated = components["schemas"]["LeadCreated"];

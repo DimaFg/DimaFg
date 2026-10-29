@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import type { PhotoCategory } from "@/lib/types";
+import type { PhotoCategory } from "@/features/portfolio/model/types";
 
 export const ALL = "all";
 

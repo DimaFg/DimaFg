@@ -1,5 +1,5 @@
 import { statement } from "@/content/about";
-import { Reveal } from "./Reveal";
+import { Reveal } from "@/shared/ui/Reveal";
 
 export function ArtistStatement() {
   return (

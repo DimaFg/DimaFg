@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-import type { Photo } from "@/lib/types";
+import type { Photo } from "@/features/portfolio/model/types";
 import { PhotoImage } from "./PhotoImage";
 
 type Props = {

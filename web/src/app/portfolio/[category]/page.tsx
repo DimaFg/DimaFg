@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { PageHero } from "@/components/PageHero";
-import { Portfolio } from "@/components/Portfolio";
-import { categories, getCategory, photosByCategory } from "@/content/portfolio";
+import { PageHero } from "@/shared/ui/PageHero";
+import { Portfolio } from "@/features/portfolio/ui/Portfolio";
+import { catalog } from "@/lib/catalog";
+
+const { categories, getCategory, photosByCategory } = catalog;
 
 export function generateStaticParams() {
   return categories.map((c) => ({ category: c.slug }));

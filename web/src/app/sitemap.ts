@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 
 import { site } from "@/config/site";
-import { categories, photos } from "@/content/portfolio";
-import { services } from "@/content/services";
+import { catalog } from "@/lib/catalog";
+
+const { categories, photos, services } = catalog;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const url = (path: string) => `${site.url}${path}`;

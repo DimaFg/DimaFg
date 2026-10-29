@@ -1,5 +1,5 @@
-import type { Service } from "@/lib/types";
-import { Reveal } from "./Reveal";
+import type { Service } from "@/features/services/model/types";
+import { Reveal } from "@/shared/ui/Reveal";
 import { ServiceCard } from "./ServiceCard";
 
 type Props = { services: Service[]; showHeading?: boolean };

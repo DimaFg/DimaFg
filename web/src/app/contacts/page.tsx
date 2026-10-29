@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 
-import { ContactSection } from "@/components/ContactSection";
+import { ContactSection } from "@/features/leads/ui/ContactSection";
 import { site } from "@/config/site";
-import { services } from "@/content/services";
+import { catalog } from "@/lib/catalog";
+
+const { services } = catalog;
 
 export const metadata: Metadata = {
   title: "Контакты",

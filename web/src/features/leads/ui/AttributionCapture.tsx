@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import { captureAttribution } from "@/lib/attribution";
+import { captureAttribution } from "@/features/leads/model/attribution";
 
 export function AttributionCapture() {
   useEffect(() => {
