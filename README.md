@@ -5,16 +5,24 @@
 
 ```
 api/        FastAPI (модульный монолит): заявки, портфолио, услуги, уведомления, auth-модели
-  app/core/       конфигурация, БД, единый формат ошибок, request_id, JSON-логи
-  app/modules/    leads · portfolio · services · notifications (outbox + worker) · auth · audit
+  app/domain/        независимые типы и правила заявок, контракты сообщений
+  app/application/   создание заявки и доставка уведомления
+  app/port/          репозитории, Unit of Work, часы, уведомления, публичные проекции
+  app/adapter/       SQLAlchemy-модели и репозитории, outbox worker, Telegram/SMTP, пароли
+  app/presentation/  HTTP-маршруты, Pydantic-схемы, ошибки и middleware
+  app/di/            сборка зависимостей через FastAPI Depends
+  app/core/          конфигурация, healthcheck, heartbeat, HMAC и JSON-логи
   alembic/        миграции
   tests/          pytest на реальном PostgreSQL
 web/        Next.js 16 + TypeScript, статическая генерация публичных страниц
-  src/components/ Header, Hero, About, ArtistStatement, Portfolio, PortfolioFilters, PhotoCard,
-                  PhotoLightbox, Services, ServiceCard, LeadForm, ContactInformation, Footer …
-  src/content/    тестовый контент (услуги, категории, кадры, тексты)
-  src/config/     открытые бизнес-решения через NEXT_PUBLIC_* переменные
-  src/styles/     CSS прототипа, разделённый по смысловым модулям
+  src/app/         маршруты, metadata, sitemap и сборка страниц
+  src/features/    leads · portfolio · services: UI, модели и данные каждой функции
+  src/components/  layout (Header, Footer, FilmChrome) и home (Hero, About, ArtistStatement)
+  src/shared/      общие UI-компоненты и accessibility-хуки
+  src/lib/         единый каталог и сгенерированные OpenAPI-типы
+  src/content/     тексты о фотографе и навигация
+  src/config/      открытые бизнес-решения через NEXT_PUBLIC_* переменные
+  src/styles/      базовые стили; стили функций лежат рядом с их компонентами
 deploy/     Caddyfile (TLS, защитные заголовки, CSP, лимит тела запроса)
 prototype/  исходный index_2.html
 docs/       статус работ и принятые решения
@@ -48,6 +56,26 @@ cd api && uv run ruff check . && uv run ruff format --check .
 cd web && npm run typecheck && npm run lint && npm run build
 ```
 
+Браузерные проверки фронтенда (форма, повторы отправки, мобильное меню, lightbox, 404):
+
+```bash
+cd web
+npx playwright install chromium
+npm run test:e2e
+```
+
+Локально тесты запускают dev-сервер сами, в CI проверяют production-сборку.
+Устройство фронтенда описано в [docs/frontend.md](./docs/frontend.md).
+
+Сценарии и границы слоёв можно проверить без PostgreSQL:
+
+```bash
+cd api
+uv run pytest tests/test_application.py tests/test_architecture.py
+```
+
+Архитектура и правила развития описаны в [docs/architecture.md](./docs/architecture.md).
+
 Типы клиента генерируются из OpenAPI-схемы FastAPI, вручную их не пишем:
 
 ```bash
@@ -77,7 +105,9 @@ docker compose exec api python -m app.cli set-password --email owner@example.ru 
 
 Заявка сохраняется в PostgreSQL вместе с outbox-заданием в одной транзакции. Отправкой занимается
 worker, а не HTTP-запрос: при сбое Telegram или почты задание повторяется с экспоненциальной
-паузой (до `OUTBOX_MAX_ATTEMPTS`), а успешно отработавшие каналы повторно не дёргаются.
+паузой (до `OUTBOX_MAX_ATTEMPTS`). Успех каждого канала сразу сохраняется отдельной
+транзакцией в `payload.done`, а при повторе сохранённые каналы пропускаются.
+После падения между внешней отправкой и её сохранением редкое повторное уведомление возможно.
 Каналы включаются переменными `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` и `SMTP_*`; если не
 настроен ни один, worker пишет в лог обезличенную запись с номером заявки.
 
